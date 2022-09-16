@@ -768,6 +768,12 @@ __deprecated_msg("implement GTMSessionFetcherAuthorizer instead")
 - (instancetype)initWithRequest:(nullable NSURLRequest *)request
                   configuration:(nullable NSURLSessionConfiguration *)configuration;
 
+// The delegate where session events are forwarded
+@property(atomic, weak) id <NSURLSessionDelegate,
+                            NSURLSessionTaskDelegate,
+                            NSURLSessionDataDelegate,
+                            NSURLSessionDownloadDelegate> delegate;
+
 // The fetcher's request.  This may not be set after beginFetch has been invoked. The request
 // may change due to redirects.
 @property(atomic, strong, nullable) NSURLRequest *request;

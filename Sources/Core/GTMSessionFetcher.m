@@ -2736,6 +2736,13 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
              didSendBodyData:(int64_t)bytesSent
               totalBytesSent:(int64_t)totalBytesSent
     totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
+  if ([_delegate respondsToSelector:@selector(URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:)]) {
+    [_delegate URLSession:session
+                     task:task
+          didSendBodyData:bytesSent
+           totalBytesSent:totalBytesSent
+ totalBytesExpectedToSend:totalBytesExpectedToSend];
+  }
   [self setSessionTask:task];
   GTMSESSION_LOG_DEBUG_VERBOSE(@"%@ %p URLSession:%@ task:%@ didSendBodyData:%lld"
                                @" totalBytesSent:%lld totalBytesExpectedToSend:%lld",
@@ -2765,6 +2772,9 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
 - (void)URLSession:(NSURLSession *)session
           dataTask:(NSURLSessionDataTask *)dataTask
     didReceiveData:(NSData *)data {
+  if ([_delegate respondsToSelector:@selector(URLSession:dataTask:didReceiveData:)]) {
+    [_delegate URLSession:session dataTask:dataTask didReceiveData:data];
+  }
   [self setSessionTask:dataTask];
   NSUInteger bufferLength = data.length;
   GTMSESSION_LOG_DEBUG_VERBOSE(@"%@ %p URLSession:%@ dataTask:%@ didReceiveData:%p (%llu bytes)",
@@ -2849,6 +2859,13 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
                  didWriteData:(int64_t)bytesWritten
             totalBytesWritten:(int64_t)totalBytesWritten
     totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+  if ([_delegate respondsToSelector:@selector(URLSession:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:)]) {
+    [_delegate URLSession:session
+             downloadTask:downloadTask
+             didWriteData:bytesWritten
+        totalBytesWritten:totalBytesWritten
+totalBytesExpectedToWrite:totalBytesExpectedToWrite];
+  }
   GTMSESSION_LOG_DEBUG_VERBOSE(@"%@ %p URLSession:%@ downloadTask:%@ didWriteData:%lld"
                                @" bytesWritten:%lld totalBytesExpectedToWrite:%lld",
                                [self class], self, session, downloadTask, bytesWritten,
@@ -2888,6 +2905,9 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
 - (void)URLSession:(NSURLSession *)session
                  downloadTask:(NSURLSessionDownloadTask *)downloadTask
     didFinishDownloadingToURL:(NSURL *)downloadLocationURL {
+  if ([_delegate respondsToSelector:@selector(URLSession:downloadTask:didFinishDownloadingToURL:)]) {
+    [_delegate URLSession:session downloadTask:downloadTask didFinishDownloadingToURL:downloadLocationURL];
+  }
   // Download may have relaunched app, so update _sessionTask.
   [self setSessionTask:downloadTask];
   GTMSESSION_LOG_DEBUG_VERBOSE(@"%@ %p URLSession:%@ downloadTask:%@ didFinishDownloadingToURL:%@",
@@ -2956,6 +2976,9 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
 - (void)URLSession:(NSURLSession *)session
                     task:(NSURLSessionTask *)task
     didCompleteWithError:(NSError *)error {
+  if ([_delegate respondsToSelector:@selector(URLSession:task:didCompleteWithError:)]) {
+    [_delegate URLSession:session task:task didCompleteWithError:error];
+  }
   [self setSessionTask:task];
   GTMSESSION_LOG_DEBUG_VERBOSE(@"%@ %p URLSession:%@ task:%@ didCompleteWithError:%@", [self class],
                                self, session, task, error);
@@ -3027,6 +3050,9 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
                           task:(NSURLSessionTask *)task
     didFinishCollectingMetrics:(NSURLSessionTaskMetrics *)metrics
     API_AVAILABLE(ios(10.0), macosx(10.12), tvos(10.0), watchos(6.0)) {
+  if ([_delegate respondsToSelector:@selector(URLSession:task:didFinishCollectingMetrics:)]) {
+    [_delegate URLSession:session task:task didFinishCollectingMetrics:metrics];
+  }
   @synchronized(self) {
     GTMSessionMonitorSynchronized(self);
     GTMSessionFetcherMetricsCollectionBlock metricsCollectionBlock = _metricsCollectionBlock;
@@ -3653,6 +3679,7 @@ static NSMutableDictionary *gSystemCompletionHandlers = nil;
             allowInvalidServerCertificates = _allowInvalidServerCertificates,
             cookieStorage = _cookieStorage,
             callbackQueue = _callbackQueue,
+            delegate = _delegate,
             initialBeginFetchDate = _initialBeginFetchDate,
             testBlock = _testBlock,
             testBlockAccumulateDataChunkCount = _testBlockAccumulateDataChunkCount,
